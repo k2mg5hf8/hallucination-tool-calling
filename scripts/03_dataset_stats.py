@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -40,8 +41,10 @@ def analyze_dataset(name: str, path: Path) -> dict:
     label_counts = [len(ex.get("hallucination_labels", [])) for ex in examples]
 
     span_lengths = []
+    corruption_types = []
     for ex in examples:
         span_lengths.extend(get_span_lengths(ex))
+        corruption_types.extend(ex.get("corruption_types", []))
 
     return {
         "dataset": name,
@@ -51,6 +54,7 @@ def analyze_dataset(name: str, path: Path) -> dict:
         "examples_with_labels": sum(1 for c in label_counts if c > 0),
         "avg_labels_per_example": round(sum(label_counts) / len(label_counts), 2),
         "avg_span_chars": round(sum(span_lengths) / len(span_lengths), 2) if span_lengths else 0,
+        "corruption_types": dict(Counter(corruption_types)) if corruption_types else {},
     }
 
 
